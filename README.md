@@ -19,7 +19,7 @@ ale-py==0.11.0\
 gymnasium==1.1.1\
 numpy==2.2.6\
 pygame==2.6.1\
-torch====2.7.0
+torch==2.7.0
 ## Acknowledgements
 
  - [Arcade Learning Enviorment](https://ale.farama.org/)
