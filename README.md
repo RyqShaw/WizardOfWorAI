@@ -12,14 +12,12 @@ A Project for our Artificial Intelligence Class: Building an AI that can beat th
 ## Getting Started
 
 Project running on Python 13\
-To get started run ./setup.sh on Linux/Mac, or .\setup.bat on Windows to install these Programs:\
+To get started run ./setup.sh on Linux/Mac, or .\setup.bat on Windows to install these Programs(Dependencies Includeded):\
 ale-py==0.11.0\
-cloudpickle==3.1.1\
-Farama-Notifications==0.0.4\
 gymnasium==1.1.1\
 numpy==2.2.6\
 pygame==2.6.1\
-typing_extensions==4.13.2
+torch====2.7.0
 ## Acknowledgements
 
  - [Arcade Learning Enviorment](https://ale.farama.org/)
