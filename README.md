@@ -7,6 +7,8 @@ A Project for our Artificial Intelligence Class: Building an AI that can beat th
 ## Authors
 
 - [Sharyq Siddiqi](https://www.github.com/ryqshaw)
+- [Shishir Pokhrek](https://www.github.com/pokhrel-sh)
+- [Hakim Badmus](https://www.github.com/Hbadmus)
 
 
 ## Getting Started
