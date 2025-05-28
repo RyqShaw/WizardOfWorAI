@@ -1,5 +1,5 @@
 
-# World of Wor AI
+# Wizard of Wor AI
 
 A Project for our Artificial Intelligence Class: Building an AI that can beat the classic Atari 2600 game, Wizard of Wor.
 
