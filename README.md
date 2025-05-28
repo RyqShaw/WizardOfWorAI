@@ -12,7 +12,7 @@ A Project for our Artificial Intelligence Class: Building an AI that can beat th
 ## Getting Started
 
 Project running on Python 13\
-Install these essential packages\
+To get started run ./setup.sh on Linux/Mac, or .\setup.bat on Windows to install these Programs:\
 ale-py==0.11.0\
 cloudpickle==3.1.1\
 Farama-Notifications==0.0.4\
