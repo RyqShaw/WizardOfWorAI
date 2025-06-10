@@ -16,6 +16,8 @@ env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram")
 device = "cpu"
 if torch.cuda.is_available():
     device = "cuda"
+if torch.mps.is_available():
+    device = "mps"
         
         
 # Get env info
@@ -32,7 +34,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
 
 
-    dqn = DQN(state_size, action_size)
+    dqn = DQN(state_size, action_size, device).to(device)
     print("initialized dqn", dqn.parameters())
     mse = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(dqn.parameters(), lr=.0000001)
@@ -74,10 +76,10 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
             # Train DQN
             if len(replay_buffer) >= batch_size:
                 states, actions, rewards, next_states = replay_buffer.sample(batch_size)
-                states = torch.FloatTensor(states)
-                actions = torch.LongTensor(actions).unsqueeze(1)
-                rewards = torch.FloatTensor(rewards).unsqueeze(1)
-                next_states = torch.FloatTensor(next_states)
+                states = torch.FloatTensor(states).to(device)
+                actions = torch.LongTensor(actions).unsqueeze(1).to(device)
+                rewards = torch.FloatTensor(rewards).unsqueeze(1).to(device)
+                next_states = torch.FloatTensor(next_states).to(device)
 
                 q_values = dqn.forward(states).gather(1, actions)
                 with torch.no_grad():

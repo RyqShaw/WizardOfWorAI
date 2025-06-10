@@ -3,9 +3,9 @@ import torch.nn as nn
 
 
 class DQN(nn.Module):
-  def __init__(self, input_dimension, output_dimension):
-    print(input_dimension, output_dimension)
+  def __init__(self, input_dimension, output_dimension, device):
     super().__init__()
+    self.device = device
     self.stack = nn.Sequential(
       nn.Linear(input_dimension, 128), # Observation layer
       nn.ReLU(),
@@ -15,4 +15,4 @@ class DQN(nn.Module):
     )
     
   def forward(self, x):
-    return self.stack(x)
+    return self.stack(x).to(self.device)
