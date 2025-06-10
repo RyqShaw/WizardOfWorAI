@@ -8,7 +8,7 @@ class ReplayBuffer:
         self.position = 0
 
     def add(self, state, action, reward, next_state):
-        transition = (state, action, reward, next_state)
+        transition = (torch.tensor(state, dtype=torch.float), action, reward, torch.tensor(next_state, dtype=torch.float))
 
         if len(self.buffer) < self.capacity:
             self.buffer.append(transition)
@@ -21,9 +21,11 @@ class ReplayBuffer:
         transitions = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states = zip(*transitions)
 
+        # print(states)
+
         return (
             torch.stack(states),
-            torch.tensor(actions),
+            torch.tensor(actions, dtype=torch.int64),
             torch.tensor(rewards, dtype=torch.float),
             torch.stack(next_states)
         )
