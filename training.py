@@ -11,6 +11,10 @@ import numpy as np
 rendering = "rgb_array"
 gym.register_envs(ale_py)
 env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram", obs_type='ram')
+
+device = "cpu"
+if torch.cuda.is_available():
+    device = "cuda"
         
 # Get env info
 obs, info = env.reset()
@@ -22,7 +26,7 @@ replay_buffer = ReplayBuffer()
 
 
 
-dqn = DQN(obs.shape[0], len(env.action_space))
+dqn = DQN(obs.shape[0], len(env.action_space)).to(device)
 mse = torch.nn.MSELoss()
 optimizer = torch.optim.Adam()
 
@@ -43,7 +47,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100000
             else:
                 # get best action from dqn 
                 with torch.no_grad():
-                    state_tensor = torch.FloatTensor(observation).unsqueeze(0)
+                    state_tensor = torch.FloatTensor(observation).unsqueeze(0).to(device)
                     q_values = dqn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
@@ -60,11 +64,11 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100000
             if len(replay_buffer) >= batch_size:
                 batch = random.sample(replay_buffer, batch_size)
                 states, actions, rewards, next_states, dones = zip(*batch)
-                states = torch.FloatTensor(states)
-                actions = torch.LongTensor(actions).unsqueeze(1)
-                rewards = torch.FloatTensor(rewards).unsqueeze(1)
-                next_states = torch.FloatTensor(next_states)
-                dones = torch.FloatTensor(dones).unsqueeze(1)
+                states = torch.FloatTensor(states).to(device)
+                actions = torch.LongTensor(actions).unsqueeze(1).to(device)
+                rewards = torch.FloatTensor(rewards).unsqueeze(1).to(device)
+                next_states = torch.FloatTensor(next_states).to(device)
+                dones = torch.FloatTensor(dones).unsqueeze(1).to(device)
 
                 q_values = dqn.forward(states).gather(1, actions)
                 with torch.no_grad():
