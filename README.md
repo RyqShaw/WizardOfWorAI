@@ -9,7 +9,7 @@ A Project for our Artificial Intelligence Class: Building an AI that can beat th
 - [Sharyq Siddiqi](https://www.github.com/ryqshaw)
 - [Shishir Pokhrel](https://www.github.com/pokhrel-sh)
 - [Hakim Badmus](https://www.github.com/Hbadmus)
-
+- [Sunil Williams](https://github.com/sunilwilliams4)
 
 ## Getting Started
 
