@@ -7,6 +7,7 @@ from replaybuffer import ReplayBuffer
 from dqn import DQN
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # Setup environment
 rendering = "rgb_array"
@@ -26,6 +27,9 @@ print(next_obs.shape, reward, terminated, truncated, info)
 state_size = obs.shape[0]
 action_size = env.action_space.n
 
+checkpoint_interval = 2
+model_path = "nn.pth"
+
 # Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
 def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
     # Save Episodes
@@ -35,19 +39,29 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
     # DQN and Torch Setup
     dqn = DQN(state_size, action_size, device).to(device)
-    print("initialized dqn", dqn.parameters())
+    #print("Initialized DQN", dqn.parameters())
     mse = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(dqn.parameters(), lr=0.001)
-    print("initialized optimizer")
+    #print("Initialized Optimizer")
+    
+    #Load Checkpoint if one exists
+    if os.path.exists("checkpoint.pth"):
+        print("Loading Checkpoint")
+        checkpoint = torch.load("checkpoint.pth")
+        dqn.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epsilon = checkpoint['epsilon']
+        episode_rewards = checkpoint['episode_rewards']
     
     # Training Loop
-    print("starting training")
+    print("Starting Training:")
     for episode in range(max_episodes):
         observation, info = env.reset()
         episode_over = False
         total_reward = 0
 
-        print(f"starting episode {episode}")
+        if episode % checkpoint_interval == 0:
+            print(f"Episode {episode} / {max_episodes}")
         while not episode_over:
             # Epsilon Greedy: random or optimal from DQN
             action = 0
@@ -99,11 +113,22 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
             
             episode_over = truncated or terminated
         episode_rewards.append(total_reward)
-        print(total_reward)
+        #print(total_reward)
+        
+        # Save Periodically incase of crash every 50 episodes:
+        if episode % checkpoint_interval == 0 and episode != 0:
+            checkpoint = {
+                'episode': episode,
+                'model_state_dict': dqn.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epsilon': epsilon,
+                'episode_rewards': episode_rewards
+            }
+            torch.save(checkpoint, "checkpoint.pth")
     plt.scatter(range(max_episodes), episode_rewards)
     plt.show()
             
     return dqn
 dqn = train(max_episodes=10)
 
-torch.save(dqn.state_dict(), "nn.pth")
+torch.save(dqn.state_dict(), model_path)
