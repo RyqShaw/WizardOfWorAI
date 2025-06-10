@@ -10,6 +10,12 @@ import numpy as np
 # Setup environment
 rendering = "rgb_array"
 gym.register_envs(ale_py)
+env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram", obs_type='ram')
+
+device = "cpu"
+if torch.cuda.is_available():
+    device = "cuda"
+        
 env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram")
         
 # Get env info
@@ -18,6 +24,13 @@ next_obs, reward, terminated, truncated, info = env.step(env.action_space.sample
 print(next_obs.shape, reward, terminated, truncated, info)
 state_size = obs.shape[0]
 action_size = env.action_space.n
+replay_buffer = ReplayBuffer()
+
+
+
+dqn = DQN(obs.shape[0], len(env.action_space)).to(device)
+mse = torch.nn.MSELoss()
+optimizer = torch.optim.Adam()
 
 def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
     current_epsilon = epsilon
@@ -47,7 +60,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
             else:
                 # get best action from dqn 
                 with torch.no_grad():
-                    state_tensor = torch.FloatTensor(observation).unsqueeze(0)
+                    state_tensor = torch.FloatTensor(observation).unsqueeze(0).to(device)
                     q_values = dqn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
