@@ -14,7 +14,7 @@ def main():
 
     # Basic ALE + Gymnasium Setup
     gym.register_envs(ale_py)
-    env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering)
+    env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type='ram')
     obs, info = env.reset()
 
     # Main Loop: Runs till Terminated or Truncated
