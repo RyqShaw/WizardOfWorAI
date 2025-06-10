@@ -27,6 +27,7 @@ print(next_obs.shape, reward, terminated, truncated, info)
 state_size = obs.shape[0]
 action_size = env.action_space.n
 
+print_statement_interval = 10
 checkpoint_interval = 50
 model_path = "nn.pth"
 
@@ -60,7 +61,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
         episode_over = False
         total_reward = 0
 
-        if episode % checkpoint_interval == 0:
+        if episode % print_statement_interval == 0:
             print(f"Episode {episode} / {max_episodes}")
         while not episode_over:
             # Epsilon Greedy: random or optimal from DQN
@@ -117,6 +118,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
         
         # Save Periodically incase of crash every 50 episodes:
         if episode % checkpoint_interval == 0 and episode != 0:
+            print(f"Checkpoint Reached: {episode}")
             checkpoint = {
                 'episode': episode,
                 'model_state_dict': dqn.state_dict(),
