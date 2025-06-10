@@ -27,7 +27,7 @@ print(next_obs.shape, reward, terminated, truncated, info)
 state_size = obs.shape[0]
 action_size = env.action_space.n
 
-checkpoint_interval = 2
+checkpoint_interval = 50
 model_path = "nn.pth"
 
 # Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
@@ -129,6 +129,6 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
     plt.show()
             
     return dqn
-dqn = train(max_episodes=10)
+dqn = train(max_episodes=100)
 
 torch.save(dqn.state_dict(), model_path)
