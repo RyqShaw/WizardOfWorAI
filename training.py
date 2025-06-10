@@ -32,7 +32,7 @@ checkpoint_interval = 50
 model_path = "nn.pth"
 
 # Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
-def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
+def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, load_checkpoint = False):
     # Save Episodes
     current_epsilon = epsilon
     episode_rewards = []
@@ -46,7 +46,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
     #print("Initialized Optimizer")
     
     #Load Checkpoint if one exists
-    if os.path.exists("checkpoint.pth"):
+    if os.path.exists("checkpoint.pth") and load_checkpoint:
         print("Loading Checkpoint")
         checkpoint = torch.load("checkpoint.pth")
         dqn.load_state_dict(checkpoint['model_state_dict'])
@@ -131,6 +131,10 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
     plt.show()
             
     return dqn
-dqn = train(max_episodes=100)
+start_time = time.time()
+dqn = train(max_episodes=100, load_checkpoint = False)
+#run this on sharyq gpu when confident it all works
+#dqn = train(batch_size=256, max_episodes=15000, load_checkpoint = False)
+print(f"Training time: {time.time() - start_time}")
 
 torch.save(dqn.state_dict(), model_path)
