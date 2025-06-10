@@ -6,6 +6,7 @@ import torch
 from replaybuffer import ReplayBuffer
 from dqn import DQN
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Setup environment
 rendering = "rgb_array"
@@ -93,12 +94,15 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
             epsilon = max(0.1, epsilon * decay)
 
-            total_reward += reward
             # step -= 0.1
             
             episode_over = truncated or terminated
+        episode_rewards.append(total_reward)
+        print(total_reward)
+    plt.scatter(range(max_episodes), episode_rewards)
+    plt.show()
             
     return dqn
-dqn = train(max_episodes=100)
+dqn = train(max_episodes=10)
 
 torch.save(dqn.state_dict(), "nn.pth")

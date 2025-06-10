@@ -3,7 +3,6 @@ import gymnasium as gym
 import ale_py
 from dqn import DQN
 import torch
-import matplotlib.pyplot as plt
 
 
 def main():
@@ -45,9 +44,7 @@ def main():
 
             if visual_render:
                 time.sleep(.01)
-                frame = env.render()
-                # plt.imshow(frame)
-                # plt.show()
+                env.render()
             episode_over = terminated or truncated
 
     total_time = time.time() - start_time
