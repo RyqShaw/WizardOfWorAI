@@ -61,6 +61,8 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
             # print(action)
             next_obs, reward, terminated, truncated, info = env.step(action)
+            if action == 0:
+                reward -= 0.01
             # reward = np.clip(reward, -1, 1)
             # if reward > 0:
 
@@ -94,8 +96,6 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
                 optimizer.step()
 
             epsilon = max(0.1, epsilon * decay)
-
-            # step -= 0.1
             
             episode_over = truncated or terminated
         episode_rewards.append(total_reward)
