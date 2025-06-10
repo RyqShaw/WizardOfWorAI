@@ -16,9 +16,8 @@ env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram")
 device = "cpu"
 if torch.cuda.is_available():
     device = "cuda"
-if torch.mps.is_available():
+elif torch.mps.is_available():
     device = "mps"
-        
         
 # Get env info
 obs, info = env.reset()
@@ -27,19 +26,21 @@ print(next_obs.shape, reward, terminated, truncated, info)
 state_size = obs.shape[0]
 action_size = env.action_space.n
 
+# Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
 def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
+    # Save Episodes
     current_epsilon = epsilon
     episode_rewards = []
     replay_buffer = ReplayBuffer(10000)
 
-
-
+    # DQN and Torch Setup
     dqn = DQN(state_size, action_size, device).to(device)
     print("initialized dqn", dqn.parameters())
     mse = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(dqn.parameters(), lr=.0000001)
+    optimizer = torch.optim.Adam(dqn.parameters(), lr=0.001)
     print("initialized optimizer")
-        
+    
+    # Training Loop
     print("starting training")
     for episode in range(max_episodes):
         observation, info = env.reset()
@@ -48,12 +49,11 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
         print(f"starting episode {episode}")
         while not episode_over:
+            # Epsilon Greedy: random or optimal from DQN
             action = 0
             if random.random() < current_epsilon:
-                # get random action (explore)
                 action = env.action_space.sample()
             else:
-                # get best action from dqn 
                 with torch.no_grad():
                     state_tensor = torch.FloatTensor(observation).unsqueeze(0).to(device)
                     q_values = dqn.forward(state_tensor)
@@ -66,14 +66,13 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100):
 
             #     print(reward)
             next_obs = np.array(next_obs).flatten()
-            episode_over = terminated or truncated
 
             # Store experience
             replay_buffer.add(observation, action, reward, next_obs)
             observation = next_obs
             total_reward += reward
 
-            # Train DQN
+            # Train DQN, Storing SARS
             if len(replay_buffer) >= batch_size:
                 states, actions, rewards, next_states = replay_buffer.sample(batch_size)
                 states = torch.FloatTensor(states).to(device)
