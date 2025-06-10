@@ -6,7 +6,7 @@ import random
 # Setup environment
 rendering = "rgb_array"
 gym.register_envs(ale_py)
-env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering)
+env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type='ram')
         
 # Get env info
 obs, info = env.reset()
