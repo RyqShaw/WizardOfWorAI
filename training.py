@@ -12,7 +12,7 @@ import os
 # Setup environment
 rendering = "rgb_array"
 gym.register_envs(ale_py)
-env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="ram")
+env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type="rgb")
 
 device = "cpu"
 if torch.cuda.is_available():
