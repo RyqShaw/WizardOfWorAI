@@ -46,12 +46,12 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
     replay_buffer = ReplayBuffer(10000)
 
     # DQN and Torch Setup
-    policy_nn = DQN(state_size, env.action_space.n).to(device)
-    target_nn = DQN(state_size, env.action_space.n).to(device)
+    policy_nn = DQN(state_size, env.action_space.n, device).to(device)
+    target_nn = DQN(state_size, env.action_space.n, device).to(device)
     min_replay_size = 5000
     #print("Initialized DQN", dqn.parameters())
     mse = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(dqn.parameters(), lr=0.00025)
+    optimizer = torch.optim.Adam(policy_nn.parameters(), lr=0.00025)
     #print("Initialized Optimizer")
     
     #Load Checkpoint if one exists
@@ -70,7 +70,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
     # Training Loop
     print("Starting Training:")
     for episode in range(episodes_done, max_episodes):
-        observation, info = env.reset()
+        obs, info = env.reset()
         episode_over = False
         total_reward = 0
         episode_steps = 0
@@ -86,14 +86,14 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 action = env.action_space.sample()
             else:
                 with torch.no_grad():
-                    state_tensor = torch.FloatTensor(observation).unsqueeze(0).to(device)
-                    q_values = dqn.forward(state_tensor)
+                    state_tensor = torch.FloatTensor(obs).unsqueeze(0).to(device)
+                    q_values = policy_nn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
             new_obs, reward, terminated, truncated, info = env.step(action)
             total_steps += 1
             episode_steps += 1
-            done = terminated or truncated
+            episode_over = terminated or truncated
             
             if ale.lives() < current_lives:
                 reward -= 10.0
@@ -109,11 +109,10 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             normalized_new_obs = new_obs_array.astype(np.float32) / 255.0
            
             # Store experience
-            replay_buffer.add(observation, action, reward, next_obs)
+            replay_buffer.add(normalized_obs, action, clipped_reward, normalized_new_obs)
             
-            next_obs = np.array(next_obs).flatten()
-            
-            observation = next_obs
+            new_obs = np.array(new_obs)
+            obs = new_obs
             total_reward += reward
 
             # Train DQN, Storing SARS
@@ -122,8 +121,8 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 
                 states, actions, rewards, next_states = replay_buffer.sample(batch_size)
                 states = torch.FloatTensor(states).to(device)
-                actions = torch.LongTensor(actions).unsqueeze(1).to(device)
-                rewards = torch.FloatTensor(rewards).unsqueeze(1).to(device)
+                actions = torch.LongTensor(actions).to(device)
+                rewards = torch.FloatTensor(rewards).to(device)
                 next_states = torch.FloatTensor(next_states).to(device)
 
                 with autocast(device):
@@ -146,7 +145,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 torch.nn.utils.clip_grad_norm_(policy_nn.parameters(), max_norm=10.0)
                 
                 # Free some memory now
-                del states, next_states, q_vals, target_q, loss
+                del states, next_states, q_vals, target_q_vals, loss
                 
                 scaler.step(optimizer)
                 scaler.update()
@@ -186,7 +185,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
     #plt.scatter(range(max_episodes), episode_rewards)
     #plt.show()
             
-    return dqn
+    return policy_nn
 
 start_time = time.time()
 dqn = train(max_episodes=100, load_checkpoint = False)
