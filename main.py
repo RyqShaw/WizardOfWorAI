@@ -23,7 +23,9 @@ def main():
 
     # Basic ALE + Gymnasium Setup
     gym.register_envs(ale_py)
-    env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type='ram')
+    env = gym.make("ALE/WizardOfWor-v5", render_mode=rendering, obs_type='grayscale')
+    env = gym.wrappers.ResizeObservation(env, (84, 84))
+    env = gym.wrappers.FrameStackObservation(env, 4)
     obs, info = env.reset()
 
     # DQN Setup
