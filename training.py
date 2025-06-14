@@ -39,9 +39,8 @@ checkpoint_interval = 1000
 model_path = "nn.pth"
 
 # Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
-def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, min_epsilon=0.05, max_episode_steps=18000, load_checkpoint = False):
+def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, min_epsilon=0.1, max_episode_steps=18000, load_checkpoint = False):
     # Save Episodes
-    current_epsilon = epsilon
     episode_rewards = []
     replay_buffer = ReplayBuffer(10000)
 
@@ -83,7 +82,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             normalized_obs = obs.astype(np.float32) / 255.0
             # Epsilon Greedy: random or optimal from DQN
             action = 0
-            if random.random() < current_epsilon:
+            if random.random() < epsilon:
                 action = env.action_space.sample()
             else:
                 with torch.no_grad():
@@ -99,15 +98,12 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             if ale.lives() < current_lives:
                 reward -= 10.0
                 current_lives = ale.lives()
-            else:
-                reward -= 0.001
             
             # Scales reward
             clipped_reward = np.clip(reward, -10, 10)
             
             # add to buffer
-            new_obs_array = np.array(new_obs)
-            normalized_new_obs = new_obs_array.astype(np.float32) / 255.0
+            normalized_new_obs = np.array(new_obs, dtype=np.float32) / 255.0
            
             # Store experience
             replay_buffer.add(normalized_obs, action, clipped_reward, normalized_new_obs)
@@ -159,8 +155,6 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 # Update target every 1000 steps AI takes
                 if total_steps % 1000 == 0:
                     target_nn.load_state_dict(policy_nn.state_dict())
-
-            epsilon = max(0.1, epsilon * decay)
             
             episode_over = truncated or terminated
              # Episode Limit
