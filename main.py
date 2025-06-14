@@ -41,7 +41,8 @@ def main():
     while not episode_over:
         action = 0
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(obs).unsqueeze(0).to(device)
+            normalized_obs = obs.astype(np.float32) / 255.0
+            state_tensor = torch.FloatTensor(normalized_obs).unsqueeze(0).to(device)
             q_values = dqn.forward(state_tensor)
             action = torch.argmax(q_values).item()
             obs, reward, terminated, truncated, info = env.step(action)
