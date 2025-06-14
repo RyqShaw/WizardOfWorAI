@@ -52,6 +52,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
     #print("Initialized DQN", dqn.parameters())
     mse = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(policy_nn.parameters(), lr=0.00025)
+    scaler = GradScaler()
     #print("Initialized Optimizer")
     
     #Load Checkpoint if one exists
@@ -86,7 +87,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 action = env.action_space.sample()
             else:
                 with torch.no_grad():
-                    state_tensor = torch.FloatTensor(obs).unsqueeze(0).to(device)
+                    state_tensor = torch.FloatTensor(normalized_obs).unsqueeze(0).to(device)
                     q_values = policy_nn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
@@ -117,7 +118,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
 
             # Train DQN, Storing SARS
             if len(replay_buffer) >= min_replay_size and total_steps % 4 == 0:
-                scaler = GradScaler()
+                
                 
                 states, actions, rewards, next_states = replay_buffer.sample(batch_size)
                 states = torch.FloatTensor(states).to(device)
@@ -151,8 +152,9 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 scaler.update()
                 optimizer.zero_grad()
                 
-                # Free some memory now
-                torch.cuda.empty_cache()
+                # Free some memory
+                if total_steps % 100 == 0:
+                    torch.cuda.empty_cache()
                 
                 # Update target every 1000 steps AI takes
                 if total_steps % 1000 == 0:
