@@ -97,9 +97,11 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             episode_steps += 1
             episode_over = terminated or truncated
             
+            
             if ale.lives() < current_lives:
                 reward -= 10.0
                 current_lives = ale.lives()
+                
             
             # Scales reward
             clipped_reward = np.clip(reward, -10, 10)
@@ -123,6 +125,12 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 actions = torch.LongTensor(actions).to(device)
                 rewards = torch.FloatTensor(rewards).to(device)
                 next_states = torch.FloatTensor(next_states).to(device)
+
+                if total_steps % 100 == 0:
+                    print(f"Current batch rewards: {rewards[:5]}")  
+                    print(f"Current batch actions: {actions[:5]}")  
+                    print(f"Episode total reward so far: {total_reward:.2f}")
+                    print(f"Steps in episode: {episode_steps}")                
 
                 with autocast(device):
                     q_vals = policy_nn.forward(states).gather(1, actions.unsqueeze(1))
