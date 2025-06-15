@@ -38,6 +38,16 @@ print_statement_interval = 100
 checkpoint_interval = 1000
 model_path = "nn.pth"
 
+# Just penelizes doing nothing for now
+def calculate_reward(base_reward, action):
+    
+    reward = base_reward
+    
+    if action == 0:  # No-op
+        reward -= 1.0
+        
+    return reward
+
 # Training: does 64 concurrent episodes by default, uses DQN and Replay Buffer Impl
 def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, min_epsilon=0.1, max_episode_steps=18000, load_checkpoint = False):
     # Save Episodes
@@ -102,7 +112,8 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 reward -= 10.0
                 current_lives = ale.lives()
                 
-            
+            reward = calculate_reward(reward, action)
+
             # Scales reward
             clipped_reward = np.clip(reward, -10, 10)
             
