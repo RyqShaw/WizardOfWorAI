@@ -207,7 +207,7 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
     return policy_nn
 
 start_time = time.time()
-dqn = train(max_episodes=1000, load_checkpoint = False)
+dqn = train(max_episodes=100, load_checkpoint = False)
 
 #run this on sharyq gpu when confident it all works
 #dqn = train(batch_size=256, max_episodes=15000, load_checkpoint = False)
