@@ -87,6 +87,8 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             else:
                 with torch.no_grad():
                     state_tensor = torch.FloatTensor(normalized_obs).unsqueeze(0).to(device)
+                    print(f"Training input shape: {state_tensor.shape}")  # Should be (1, 4, 84, 84)
+                    print(f"Training Q-values: {policy_nn.forward(state_tensor)}")  # Should be diff each time
                     q_values = policy_nn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
