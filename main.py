@@ -3,6 +3,7 @@ import gymnasium as gym
 import ale_py
 from dqn import DQN
 import torch
+import numpy as np
 
 # Show Ai Runs
 def main():
