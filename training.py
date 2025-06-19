@@ -50,10 +50,10 @@ def calculate_reward(base_reward, action):
     return reward
 
 # training with 64 concurrent episodes, uses DQN and Replay Buffer Implementation
-def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, min_epsilon=0.1, max_episode_steps=18000, load_checkpoint = False):
+def train(batch_size=64, gamma=0.999, epsilon=1, decay=.99999, max_episodes=10000, min_epsilon=0.1, max_episode_steps=18000, load_checkpoint = False):
     # init replay buffer with 10k size
     episode_rewards = []
-    replay_buffer = ReplayBuffer(10000)
+    replay_buffer = ReplayBuffer(10000) 
 
     policy_nn = DQN(state_size, env.action_space.n, device).to(device)
     target_nn = DQN(state_size, env.action_space.n, device).to(device)
@@ -96,8 +96,8 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
             else:
                 with torch.no_grad():
                     state_tensor = torch.FloatTensor(normalized_obs).unsqueeze(0).to(device)
-                    print(f"Training input shape: {state_tensor.shape}") 
-                    print(f"Training Q-values: {policy_nn.forward(state_tensor)}") 
+                    """ print(f"Training input shape: {state_tensor.shape}") 
+                    print(f"Training Q-values: {policy_nn.forward(state_tensor)}")  """
                     q_values = policy_nn.forward(state_tensor)
                     action = torch.argmax(q_values).item()
 
@@ -194,14 +194,18 @@ def train(batch_size=64, gamma=0.999, epsilon=1, decay=.999, max_episodes=100, m
                 'epsilon': epsilon,
             }
             torch.save(checkpoint, "checkpoint.path")
-    ## show the scatter plot
-    #plt.scatter(range(max_episodes), episode_rewards)
-    #plt.show()
+    # show the scatter plot
+    plt.scatter(range(len(episode_rewards)), episode_rewards)
+    plt.title("Episode Rewards Over Time: 1000 Episodes")
+    plt.xlabel("Episode")
+    plt.ylabel("Reward")
+    plt.grid(True)
+    plt.show()
 
     return policy_nn
 
 start_time = time.time()
-dqn = train(max_episodes=100, load_checkpoint = False)
+dqn = train(max_episodes=1000, load_checkpoint = False)
 
 #run this on sharyq gpu when confident it all works
 #dqn = train(batch_size=256, max_episodes=15000, load_checkpoint = False)
