@@ -5,16 +5,20 @@ import torch.nn as nn
 class DQN(nn.Module):
   def __init__(self, input_dimension, output_dimension, device):
     super().__init__()
+    print("dimension", input_dimension)
     self.device = device
     # Convolutional layers (observation layer)
     self.conv_layers = nn.Sequential(
-      nn.Conv2d(input_dimension, 32, kernel_size=8, stride=4, padding=0),
+      nn.Conv2d(input_dimension, 16, kernel_size=8, stride=2, padding=0),
       nn.ReLU(),
             
-      nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0),
-      nn.ReLU(),
+      # nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0),
+      # nn.ReLU(),
           
-      nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0),
+      # nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=0),
+      # nn.ReLU(),
+      
+      nn.Conv2d(16, 4, kernel_size=4, stride=1, padding=0),
       nn.ReLU(),
       nn.Flatten()
     )
@@ -28,7 +32,11 @@ class DQN(nn.Module):
       
     # Linear Layers (hidden and action layers)
     self.fc_layers = nn.Sequential(
-      nn.Linear(3136, 512),  
+      nn.Linear(5336 + 0, 1024),  
+      nn.ReLU(),
+      nn.Linear(1024, 512),   
+      # nn.ReLU(),
+      # nn.Linear(512, 512),  
       nn.ReLU(),
       nn.Linear(512, output_dimension) 
     )
@@ -45,8 +53,10 @@ class DQN(nn.Module):
     #cleaner and helped me undertsand it better
 
     
-  def forward(self, x):
-    features = self.conv_layers(x)
+  def forward(self, x
+              # , fc_data
+              ):
+    features = self.conv_layers(x).to(self.device)
+    # features = torch.cat(features, fc_data).to(self.device)
     return self.fc_layers(features).to(self.device)
-    #return self.stack(x).to(self.device)
 
